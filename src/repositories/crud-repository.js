@@ -1,4 +1,6 @@
 const { Logger } = require("../config");
+const { AppError } = require("../utils/errors");
+const { StatusCodes } = require("http-status-codes");
 
 class CrudRepository {
   constructor(model) {
@@ -6,53 +8,48 @@ class CrudRepository {
   }
 
   async create(data) {
-    return await this.model.create(data);
+    const response = await this.model.create(data);
+    return response;
   }
 
   async destroy(data) {
-    try {
-      const response = await this.model.destroy({
-        where: {
-          id: data,
-        },
-      });
-      return response;
-    } catch (err) {
-      Logger.error("something went wrong while delete", err);
-      throw err;
+    const response = await this.model.destroy({
+      where: {
+        id: data,
+      },
+    });
+    if (!response) {
+      console.log("the response:", response);
+      s;
+      throw new AppError(
+        "Not able to find the resource.",
+        StatusCodes.NOT_FOUND
+      );
     }
+    return response;
   }
 
   async get(data) {
-    try {
-      const response = await this.model.findByPk(data);
-      return response;
-    } catch (err) {
-      Logger.error("something went wrong while getByPk", err);
-      throw err;
+    const response = await this.model.findByPk(data);
+    if (!response) {
+      throw new AppError(
+        "Not able to find the resource.",
+        StatusCodes.NOT_FOUND
+      );
     }
+    return response;
   }
   async update(id, data) {
-    try {
-      const response = await this.model.update(data, {
-        where: {
-          id: id,
-        },
-      });
-    } catch (err) {
-      Logger.error("something went wrong while getByPk", err);
-      throw err;
-    }
+    const response = await this.model.update(data, {
+      where: {
+        id: id,
+      },
+    });
   }
 
   async getAll() {
-    try {
-      const response = await this.model.findAll();
-      return response;
-    } catch (err) {
-      Logger.error("Something went wrong ", err);
-      throw err;
-    }
+    const response = await this.model.findAll();
+    return response;
   }
 }
 
